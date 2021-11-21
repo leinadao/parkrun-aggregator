@@ -41,7 +41,7 @@ func (e event) filename() string {
 }
 
 func (e event) writeCSV() {
-	data := make([][]string, 0, resultsCapacity+1) // TODO: Try interface to see if conversions can be skipped?
+	data := make([][]string, 0, resultsCapacity+1)
 	data = append(data, []string{"id", "name", "ageGroup", "club", "clubId", "gender", "position", "runs", "ageGrade", "achievement", "time", "previousPB"})
 	for _, r := range e.results {
 		data = append(data, []string{
