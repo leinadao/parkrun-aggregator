@@ -1,3 +1,6 @@
+// parkrunaggregator is a package for aggregating and interrogating Parkrun data.
+// It stores data locally to scrape an event's result only once and reduce site load.
+// Written as an example go project, it is not officially supported and not for re-use.
 package main
 
 import (
@@ -12,6 +15,9 @@ import (
 
 // TODO: REVIEW: Create runner objects?
 
+// getEvent retrieves the available data for the given event number
+// at the given Parkrun location.
+// It returns a new event instance pointer.
 func getEvent(location string, eventNum int) *event {
 	resp, err := http.Get(fmt.Sprintf("https://www.parkrun.org.uk/%v/results/%v/", location, eventNum))
 	if err != nil {
@@ -72,6 +78,8 @@ func getEvent(location string, eventNum int) *event {
 	}
 }
 
+// main takes a Parkrun location and retrieves any outstanding data.
+// Data is written to a CSV file per event.
 func main() {
 	// Take in a location name:
 	fmt.Println("Enter the full Parkrun location name. e.g. 'bathskyline': ")
