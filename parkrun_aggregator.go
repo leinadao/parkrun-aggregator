@@ -79,8 +79,7 @@ func (e event) writeCSV() {
 
 // TODO: REVIEW: Create runner objects?
 
-func getEvent(location string, eventNum int) event {
-	// TODO: Return object.
+func getEvent(location string, eventNum int) *event {
 	resp, err := http.Get(fmt.Sprintf("https://www.parkrun.org.uk/%v/results/%v/", location, eventNum))
 	if err != nil {
 		// TODO: Add error handling.
@@ -127,7 +126,7 @@ func getEvent(location string, eventNum int) event {
 			time:        s.Find(".Results-table-td.Results-table-td--time").Find(".compact").Text(),
 		})
 	})
-	return event{
+	return &event{
 		location: location,
 		number:   eventNum,
 		date:     date,
