@@ -25,9 +25,16 @@ type result struct {
 	previousPB  string
 }
 
-// TODO: Create result objects and event objects (and runner?)
+type event struct {
+	location string
+	number   int
+	date     string
+	results  []result
+}
 
-func getEvent(location string, eventNum int) []result {
+// TODO: REVIEW: Create runner objects?
+
+func getEvent(location string, eventNum int) event {
 	// TODO: Return object.
 	resp, err := http.Get(fmt.Sprintf("https://www.parkrun.org.uk/%v/results/%v/", location, eventNum))
 	if err != nil {
@@ -44,6 +51,7 @@ func getEvent(location string, eventNum int) []result {
 		// TODO: Change error handling?
 		log.Fatal(err)
 	}
+	date := doc.Find(".Results-header").Find(".format-date").Text()
 	results := make([]result, 0, 500) // TODO: REVIEW capacity of 500.
 	doc.Find(".Results-table-row").Each(func(i int, s *goquery.Selection) {
 		idStr := s.Find(".Results-table-td.Results-table-td--name").Find(".compact").Find("a").AttrOr("href", "")
@@ -53,7 +61,7 @@ func getEvent(location string, eventNum int) []result {
 		previousPB, _ := s.Find(".Results-table-td.Results-table-td--time").Find(".detailed").Html() // TODO: Handle error.
 		previousPB = strings.ReplaceAll(previousPB, "<span class=\"Results-table--normal\">", "")
 		previousPB = strings.ReplaceAll(previousPB, "<span class=\"Results-table--red\">", "")
-		previousPB = strings.ReplaceAll(previousPB, "<span class=\"Results-table--green\">", "")
+		previousPB = strings.ReplaceAll(previousPB, "<span class=\"Results-table--green\">", "") // TODO: Group using regex?
 		previousPB = strings.ReplaceAll(previousPB, "</span>", "")
 		previousPB = strings.ReplaceAll(previousPB, "</span>&nbsp;", " ")
 		position, _ := strconv.Atoi(s.AttrOr("data-position", ""))           // TODO: Handle error.
@@ -74,7 +82,12 @@ func getEvent(location string, eventNum int) []result {
 			time:        s.Find(".Results-table-td.Results-table-td--time").Find(".compact").Text(),
 		})
 	})
-	return results
+	return event{
+		location: location,
+		number:   eventNum,
+		date:     date,
+		results:  results,
+	}
 }
 
 func main() {
