@@ -1,14 +1,18 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
+
+const resultsCapacity = 500 // TODO: REVIEW capacity of 500.
 
 type result struct {
 	id          int
@@ -22,14 +26,55 @@ type result struct {
 	ageGrade    float32
 	achievement string
 	time        string
-	previousPB  string
+	previousPB  string // TODO: Handle 'New PB etc. strings --> Set to time.'
 }
 
 type event struct {
 	location string
 	number   int
-	date     string
+	date     string // Format dd-mm-yyy.
 	results  []result
+}
+
+func (e event) filename() string {
+	return fmt.Sprintf("%v_%v_%v.csv", e.location, e.number, e.date)
+}
+
+func (e event) writeCSV() {
+	data := make([][]string, 0, resultsCapacity+1) // TODO: Try interface to see if conversions can be skipped?
+	data = append(data, []string{"id", "name", "ageGroup", "club", "clubId", "gender", "position", "runs", "ageGrade", "achievement", "time", "previousPB"})
+	for _, r := range e.results {
+		data = append(data, []string{
+			strconv.Itoa(r.id),
+			r.name,
+			r.ageGroup,
+			r.club,
+			strconv.Itoa(r.clubId),
+			r.gender,
+			strconv.Itoa(r.position),
+			strconv.Itoa(r.runs),
+			fmt.Sprintf("%f", r.ageGrade), // TODO: Result here needs rounding off.
+			r.achievement,
+			r.time,
+			r.previousPB,
+		})
+	}
+	// TODO: Handle custom file location?
+	file, err := os.Create(e.filename())
+	if err != nil {
+		log.Fatal("Cannot create file", err)
+		// TODO: Update error handling.
+	}
+	defer file.Close()
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+	for _, value := range data {
+		err := writer.Write(value)
+		if err != nil {
+			log.Fatal("Cannot write to file", err)
+			// TODO: Update error handling.
+		}
+	}
 }
 
 // TODO: REVIEW: Create runner objects?
@@ -51,8 +96,8 @@ func getEvent(location string, eventNum int) event {
 		// TODO: Change error handling?
 		log.Fatal(err)
 	}
-	date := doc.Find(".Results-header").Find(".format-date").Text()
-	results := make([]result, 0, 500) // TODO: REVIEW capacity of 500.
+	date := strings.ReplaceAll(doc.Find(".Results-header").Find(".format-date").Text(), "/", "-")
+	results := make([]result, 0, resultsCapacity)
 	doc.Find(".Results-table-row").Each(func(i int, s *goquery.Selection) {
 		idStr := s.Find(".Results-table-td.Results-table-td--name").Find(".compact").Find("a").AttrOr("href", "")
 		id, _ := strconv.Atoi(idStr[strings.LastIndex(idStr, "/")+1:]) // TODO: Handle error.
@@ -101,6 +146,8 @@ func main() {
 	// TODO: Work out expected event no. from date?
 	eventNum := 298
 	// TODO: Check which events are missing and iterate through (initial cap of 5?)
-	eventData := getEvent(location, eventNum)
-	fmt.Println(eventData)
+	testEvent := getEvent(location, eventNum)
+	fmt.Println(testEvent)
+	fmt.Println(testEvent.filename())
+	testEvent.writeCSV()
 }
