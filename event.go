@@ -55,3 +55,12 @@ func (e event) writeCSV() {
 		}
 	}
 }
+
+// TODO: Add no. first timer's method
+// TODO: Add no. PBs (inc 1sts and 1sts as 2nd return?) method
+// TODO: Add total no. method.
+// TODO: Add no. clubs, most rep club methods?
+// TODO: Add no. M/F methods.
+// TODO: Add fastest time, fastest M/F, slowest time, slowest M/F methods?
+// TODO: Add method to report on age group %'s?
+// TODO: Add no. unknown method?

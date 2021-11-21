@@ -79,8 +79,6 @@ func main() {
 	fmt.Scanln(&location)
 
 	fmt.Printf("Location is %v...\n", location)
-	// TODO: Take in a date?
-	// TODO: Work out expected event no. from date?
 	eventNum := 298
 	// TODO: Check which events are missing and iterate through (initial cap of 5?)
 	testEvent := getEvent(location, eventNum)
