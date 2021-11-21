@@ -14,5 +14,5 @@ type result struct {
 	ageGrade    float32
 	achievement string
 	time        string
-	previousPB  string // TODO: Handle 'New PB etc. strings --> Set to time.'
+	currentPB   string
 }

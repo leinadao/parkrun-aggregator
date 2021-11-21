@@ -21,7 +21,7 @@ func (e event) filename() string {
 
 func (e event) writeCSV() {
 	data := make([][]string, 0, resultsCapacity+1)
-	data = append(data, []string{"id", "name", "ageGroup", "club", "clubId", "gender", "position", "runs", "ageGrade", "achievement", "time", "previousPB"})
+	data = append(data, []string{"id", "name", "ageGroup", "club", "clubId", "gender", "position", "runs", "ageGrade", "achievement", "time", "currentPB"})
 	for _, r := range e.results {
 		data = append(data, []string{
 			strconv.Itoa(r.id),
@@ -32,10 +32,10 @@ func (e event) writeCSV() {
 			r.gender,
 			strconv.Itoa(r.position),
 			strconv.Itoa(r.runs),
-			fmt.Sprintf("%f", r.ageGrade), // TODO: Result here needs rounding off.
+			fmt.Sprintf("%.2f", r.ageGrade),
 			r.achievement,
 			r.time,
-			r.previousPB,
+			r.currentPB,
 		})
 	}
 	// TODO: Handle custom file location?
