@@ -26,9 +26,14 @@ func main() {
 			tmpLimiter += 1 // TODO: REVIEW: Remove limiter?
 			eP, err := getEvent(location, eN)
 			if err != nil {
-				return
+				fmt.Println("No more events to fetch.")
+				break
+			} else {
+				fmt.Printf("Fetched event %v: %v...\n", eP.number, eP.date)
 			}
 			eP.writeCSV()
+		} else {
+			fmt.Printf("Loaded event %v: %v...\n", eP.number, eP.date)
 		}
 		eventPs = append(eventPs, eP)
 	}
