@@ -10,7 +10,7 @@ type result struct {
 	name        string
 	ageGroup    string
 	club        string
-	clubId      int
+	clubID      int
 	gender      string
 	position    int
 	runs        int

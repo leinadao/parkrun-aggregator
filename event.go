@@ -33,14 +33,14 @@ func (e *event) filename() string {
 // Any existing file will be overwritten.
 func (e *event) writeCSV() {
 	data := make([][]string, 0, resultsCapacity+1)
-	data = append(data, []string{"id", "name", "ageGroup", "club", "clubId", "gender", "position", "runs", "ageGrade", "achievement", "time", "currentPB"})
+	data = append(data, []string{"id", "name", "ageGroup", "club", "clubID", "gender", "position", "runs", "ageGrade", "achievement", "time", "currentPB"})
 	for _, r := range e.results {
 		data = append(data, []string{
 			strconv.Itoa(r.id),
 			r.name,
 			r.ageGroup,
 			r.club,
-			strconv.Itoa(r.clubId),
+			strconv.Itoa(r.clubID),
 			r.gender,
 			strconv.Itoa(r.position),
 			strconv.Itoa(r.runs),
@@ -105,7 +105,7 @@ func newEventFromCSV(filename string) *event {
 			continue
 		}
 		id, _ := strconv.Atoi(r[0])
-		clubId, _ := strconv.Atoi(r[4])
+		clubID, _ := strconv.Atoi(r[4])
 		position, _ := strconv.Atoi(r[6])
 		runs, _ := strconv.Atoi(r[7])
 		ageGrade, _ := strconv.ParseFloat(r[8], 32)
@@ -114,7 +114,7 @@ func newEventFromCSV(filename string) *event {
 			name:        r[1],
 			ageGroup:    r[2],
 			club:        r[3],
-			clubId:      clubId,
+			clubID:      clubID,
 			gender:      r[5],
 			position:    position,
 			runs:        runs,
@@ -174,8 +174,8 @@ func getEvent(location string, eventNum int) (*event, error) {
 	docRes.Each(func(i int, s *goquery.Selection) {
 		idStr := s.Find(".Results-table-td.Results-table-td--name").Find(".compact").Find("a").AttrOr("href", "")
 		id, _ := strconv.Atoi(idStr[strings.LastIndex(idStr, "/")+1:]) // TODO: Handle error.
-		clubIdStr := s.Find(".Results-table-club.Results-tablet").Find(".detailed").Find("a").AttrOr("href", "")
-		clubId, _ := strconv.Atoi(clubIdStr[strings.LastIndex(clubIdStr, "=")+1:])                  // TODO: Handle error.
+		clubIDStr := s.Find(".Results-table-club.Results-tablet").Find(".detailed").Find("a").AttrOr("href", "")
+		clubID, _ := strconv.Atoi(clubIDStr[strings.LastIndex(clubIDStr, "=")+1:])                  // TODO: Handle error.
 		currentPB, _ := s.Find(".Results-table-td.Results-table-td--time").Find(".detailed").Html() // TODO: Handle error.
 		currentPB = strings.ReplaceAll(currentPB, "<span class=\"Results-table--normal\">PB", "")
 		currentPB = strings.ReplaceAll(currentPB, "<span class=\"Results-table--red\">", "")
@@ -192,7 +192,7 @@ func getEvent(location string, eventNum int) (*event, error) {
 		ageGrade, _ := strconv.ParseFloat(s.AttrOr("data-agegrade", ""), 32) // Still made as float64 but convertable to 32. // TODO: Handle error.
 		results = append(results, result{
 			id:          id,
-			clubId:      clubId,
+			clubID:      clubID,
 			currentPB:   currentPB,
 			name:        s.AttrOr("data-name", ""),
 			ageGroup:    s.AttrOr("data-agegroup", ""),
