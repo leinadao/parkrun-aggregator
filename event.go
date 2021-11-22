@@ -2,9 +2,11 @@ package main
 
 import (
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -63,7 +65,7 @@ func (e *event) writeCSV() {
 	}
 }
 
-// parseEventFilename reads the event metadata from a saved CSV filename.
+// parseEventFilename reads and returns the event metadata from a saved CSV filename.
 func parseEventFilename(filename string) (location string, number int, date string) {
 	// TODO: Handle errors.
 	filename = strings.ReplaceAll(filename, ".csv", "")
@@ -72,9 +74,9 @@ func parseEventFilename(filename string) (location string, number int, date stri
 	return parts[0], number, parts[2]
 }
 
-// newEventFromFilename loads the event data from the
+// newEventFromCSV loads the event data from the
 // given filename and returns a pointer to the new instance.
-func newEventFromFilename(filename string) *event {
+func newEventFromCSV(filename string) *event {
 	// TODO: Error handling add / upgrade.
 	location, eventNum, date := parseEventFilename(filename)
 	newEvent := event{
@@ -120,6 +122,24 @@ func newEventFromFilename(filename string) *event {
 		})
 	}
 	return &newEvent
+}
+
+// loadEvent tries to load and return an event pointer from
+// a CSV file based only on the event location and number given.
+func loadEventCSV(location string, eventNum int) (*event, error) {
+	tmpE := event{location: location, number: eventNum, date: "*"}
+	matches, err := filepath.Glob(tmpE.filename())
+	if err != nil {
+		return nil, err
+	}
+	if matches == nil {
+		return nil, errors.New("no files found")
+	}
+	if len(matches) != 1 {
+		return nil, errors.New("multiple files found")
+	}
+	eP := newEventFromCSV(matches[0])
+	return eP, nil
 }
 
 // TODO: Add no. first timer's method

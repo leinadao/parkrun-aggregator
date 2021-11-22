@@ -93,15 +93,19 @@ func main() {
 	var location string
 	fmt.Scanln(&location)
 	fmt.Printf("Location is %v...\n", location)
-	eventNum := 297
-	// TODO: Check which events are missing and iterate through (initial cap of 5?)
-	testEvent, err := getEvent(location, eventNum)
-	if err != nil {
-		return
+	var eventPs []*event
+	// Load or fetch all possible events for the location:
+	for eN, tmpLimiter := 1, 0; tmpLimiter < 5; eN++ {
+		eP, err := loadEventCSV(location, eN)
+		if err != nil {
+			tmpLimiter += 1 // TODO: REVIEW: Remove limiter?
+			eP, err := getEvent(location, eN)
+			if err != nil {
+				return
+			}
+			eP.writeCSV()
+		}
+		eventPs = append(eventPs, eP)
 	}
-	fmt.Println(testEvent)
-	fmt.Println(testEvent.filename())
-	testEvent.writeCSV()
-	testEvent2 := newEventFromFilename(testEvent.filename())
-	fmt.Println(testEvent2)
+	fmt.Println(len(eventPs))
 }
