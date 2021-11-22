@@ -33,15 +33,15 @@ func (e *event) filename() string {
 // Any existing file will be overwritten.
 func (e *event) writeCSV() {
 	data := make([][]string, 0, resultsCapacity+1)
-	data = append(data, []string{"id", "name", "ageGroup", "club", "clubID", "gender", "position", "runs", "ageGrade", "achievement", "time", "currentPB"})
+	data = append(data, []string{"runnerID", "runnerName", "runnerGender", "ageGroup", "clubID", "clubName", "position", "runs", "ageGrade", "achievement", "time", "currentPB"})
 	for _, r := range e.results {
 		data = append(data, []string{
-			strconv.Itoa(r.id),
-			r.name,
+			strconv.Itoa(r.runner.id),
+			r.runner.name,
+			r.runner.gender,
 			r.ageGroup,
-			r.club,
-			strconv.Itoa(r.clubID),
-			r.gender,
+			strconv.Itoa(r.club.id),
+			r.club.name,
 			strconv.Itoa(r.position),
 			strconv.Itoa(r.runs),
 			fmt.Sprintf("%.2f", r.ageGrade),
@@ -110,12 +110,16 @@ func newEventFromCSV(filename string) *event {
 		runs, _ := strconv.Atoi(r[7])
 		ageGrade, _ := strconv.ParseFloat(r[8], 32)
 		newEvent.results = append(newEvent.results, result{
-			id:          id,
-			name:        r[1],
-			ageGroup:    r[2],
-			club:        r[3],
-			clubID:      clubID,
-			gender:      r[5],
+			runner: runner{
+				id:     id,
+				name:   r[1],
+				gender: r[2],
+			},
+			ageGroup: r[3],
+			club: club{
+				id:   clubID,
+				name: r[5],
+			},
 			position:    position,
 			runs:        runs,
 			ageGrade:    float32(ageGrade),
@@ -191,13 +195,17 @@ func getEvent(location string, eventNum int) (*event, error) {
 		runs, _ := strconv.Atoi(s.AttrOr("data-runs", ""))                   // TODO: Handle error.
 		ageGrade, _ := strconv.ParseFloat(s.AttrOr("data-agegrade", ""), 32) // Still made as float64 but convertable to 32. // TODO: Handle error.
 		results = append(results, result{
-			id:          id,
-			clubID:      clubID,
+			runner: runner{
+				id:     id,
+				name:   s.AttrOr("data-name", ""),
+				gender: s.AttrOr("data-gender", ""),
+			},
+			club: club{
+				id:   clubID,
+				name: s.AttrOr("data-club", ""),
+			},
 			currentPB:   currentPB,
-			name:        s.AttrOr("data-name", ""),
 			ageGroup:    s.AttrOr("data-agegroup", ""),
-			club:        s.AttrOr("data-club", ""),
-			gender:      s.AttrOr("data-gender", ""),
 			position:    position,
 			runs:        runs,
 			ageGrade:    float32(ageGrade),
@@ -205,6 +213,7 @@ func getEvent(location string, eventNum int) (*event, error) {
 			time:        time,
 		})
 	})
+	// TODO: Make event before results and build into event for efficiency?
 	return &event{
 		location: location,
 		number:   eventNum,

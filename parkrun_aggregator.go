@@ -7,7 +7,6 @@ import (
 	"fmt"
 )
 
-// TODO: REVIEW: Create runner objects?
 // TODO: Add test code!
 
 // main takes a Parkrun location and retrieves any outstanding data.

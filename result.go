@@ -6,12 +6,9 @@ const resultsCapacity = 500 // TODO: REVIEW capacity of 500.
 // result is a runner's result during a single Parkrun event.
 // It contains no details of or link to the event itself.
 type result struct {
-	id          int
-	name        string
-	ageGroup    string
-	club        string
-	clubID      int
-	gender      string
+	runner      runner
+	ageGroup    string // TODO: REVIEW: More likely to change so not moved to runner.
+	club        club   // TODO: REVIEW: More likely to change so not moved to runner.
 	position    int
 	runs        int
 	ageGrade    float32
