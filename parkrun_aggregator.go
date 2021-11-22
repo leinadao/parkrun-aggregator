@@ -1,4 +1,4 @@
-// parkrunaggregator is a package for aggregating and interrogating Parkrun data.
+// The parkrunaggregator program is for aggregating and interrogating Parkrun data.
 // It stores data locally to scrape an event's result only once and reduce site load.
 // Written as an example go project, it is not officially supported and not for re-use.
 package main
