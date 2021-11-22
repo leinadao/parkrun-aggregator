@@ -14,6 +14,7 @@ import (
 )
 
 // TODO: REVIEW: Create runner objects?
+// TODO: Add test code!
 
 // getEvent retrieves the available data for the given event number
 // at the given Parkrun location.
@@ -93,4 +94,6 @@ func main() {
 	fmt.Println(testEvent)
 	fmt.Println(testEvent.filename())
 	testEvent.writeCSV()
+	testEvent2 := newEventFromFilename(testEvent.filename())
+	fmt.Println(testEvent2)
 }

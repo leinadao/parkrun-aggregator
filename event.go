@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 )
 
 // event is a single Parkrun event including metadata and runner results.
@@ -60,6 +61,65 @@ func (e event) writeCSV() {
 			// TODO: Update error handling.
 		}
 	}
+}
+
+// parseEventFilename reads the event metadata from a saved CSV filename.
+func parseEventFilename(filename string) (location string, number int, date string) {
+	// TODO: Handle errors.
+	filename = strings.ReplaceAll(filename, ".csv", "")
+	parts := strings.Split(filename, "_")
+	number, _ = strconv.Atoi(parts[1])
+	return parts[0], number, parts[2]
+}
+
+// newEventFromFilename loads the event data from the
+// given filename and returns a pointer to the new instance.
+func newEventFromFilename(filename string) *event {
+	// TODO: Error handling add / upgrade.
+	location, eventNum, date := parseEventFilename(filename)
+	newEvent := event{
+		location: location,
+		number:   eventNum,
+		date:     date,
+	}
+	f, err := os.Open(filename)
+	if err != nil {
+		log.Fatal("Unable to read input file "+filename, err)
+	}
+	defer f.Close()
+	csvReader := csv.NewReader(f)
+	data, err := csvReader.ReadAll()
+	if err != nil {
+		log.Fatal("Unable to parse file as CSV for "+filename, err)
+	}
+	for i, r := range data {
+		// TODO: REVIEW: Could use reflection to handle mis-ordered columns.
+		if i == 0 {
+			// TODO: Add checking for header line. -> def as const? --> gen from struct values??
+			// TODO: REVIEW: Could check for column names and ignore odd columns.
+			continue
+		}
+		id, _ := strconv.Atoi(r[0])
+		clubId, _ := strconv.Atoi(r[4])
+		position, _ := strconv.Atoi(r[6])
+		runs, _ := strconv.Atoi(r[7])
+		ageGrade, _ := strconv.ParseFloat(r[8], 32)
+		newEvent.results = append(newEvent.results, result{
+			id:          id,
+			name:        r[1],
+			ageGroup:    r[2],
+			club:        r[3],
+			clubId:      clubId,
+			gender:      r[5],
+			position:    position,
+			runs:        runs,
+			ageGrade:    float32(ageGrade),
+			achievement: r[9],
+			time:        r[10],
+			currentPB:   r[11],
+		})
+	}
+	return &newEvent
 }
 
 // TODO: Add no. first timer's method
