@@ -4,6 +4,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -19,14 +20,15 @@ import (
 // getEvent retrieves the available data for the given event number
 // at the given Parkrun location.
 // It returns a new event instance pointer.
-func getEvent(location string, eventNum int) *event {
+func getEvent(location string, eventNum int) (*event, error) {
 	resp, err := http.Get(fmt.Sprintf("https://www.parkrun.org.uk/%v/results/%v/", location, eventNum))
 	if err != nil {
 		// TODO: Add error handling.
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
-		// TODO: Add error handling.
+		return nil, errors.New("not 200 response")
+		// TODO: Improve error handling.
 		// log.Fatalf("status code error: %d %s", resp.StatusCode, resp.Status)
 	}
 	// Load the HTML document
@@ -35,9 +37,13 @@ func getEvent(location string, eventNum int) *event {
 		// TODO: Change error handling?
 		log.Fatal(err)
 	}
+	docRes := doc.Find(".Results-table-row")
+	if docRes.Length() == 0 {
+		return nil, errors.New("no results found")
+	}
 	date := strings.ReplaceAll(doc.Find(".Results-header").Find(".format-date").Text(), "/", "-")
 	results := make([]result, 0, resultsCapacity)
-	doc.Find(".Results-table-row").Each(func(i int, s *goquery.Selection) {
+	docRes.Each(func(i int, s *goquery.Selection) {
 		idStr := s.Find(".Results-table-td.Results-table-td--name").Find(".compact").Find("a").AttrOr("href", "")
 		id, _ := strconv.Atoi(idStr[strings.LastIndex(idStr, "/")+1:]) // TODO: Handle error.
 		clubIdStr := s.Find(".Results-table-club.Results-tablet").Find(".detailed").Find("a").AttrOr("href", "")
@@ -76,7 +82,7 @@ func getEvent(location string, eventNum int) *event {
 		number:   eventNum,
 		date:     date,
 		results:  results,
-	}
+	}, nil
 }
 
 // main takes a Parkrun location and retrieves any outstanding data.
@@ -86,11 +92,13 @@ func main() {
 	fmt.Println("Enter the full Parkrun location name. e.g. 'bathskyline': ")
 	var location string
 	fmt.Scanln(&location)
-
 	fmt.Printf("Location is %v...\n", location)
-	eventNum := 298
+	eventNum := 297
 	// TODO: Check which events are missing and iterate through (initial cap of 5?)
-	testEvent := getEvent(location, eventNum)
+	testEvent, err := getEvent(location, eventNum)
+	if err != nil {
+		return
+	}
 	fmt.Println(testEvent)
 	fmt.Println(testEvent.filename())
 	testEvent.writeCSV()
