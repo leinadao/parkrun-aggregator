@@ -45,28 +45,37 @@ func findOccurancesPerRunner(eventPs []*event) {
 // Data is written to a CSV file per event.
 func main() {
 	// Take in a location name:
-	fmt.Println("Enter the full Parkrun location name. e.g. 'bathskyline': ")
+	fmt.Println("Enter the full Parkrun location name. e.g. 'bathskyline': ") // TODO: Split off this input as own fn.
 	var location string
 	fmt.Scanln(&location)
 	fmt.Printf("Location is %v...\n", location)
 	var eventPs []*event
+	incomplete := true
 	// Load or fetch all possible events for the location:
-	for eN, tmpLimiter := 1, 0; tmpLimiter < 5; eN++ {
-		eP, err := loadEventCSV(location, eN)
+	for eN, tmpLimiter := 1, 0; tmpLimiter < 100; eN++ {
+		var (
+			eP  *event // Needed for use outside if, if set in if.
+			err error
+		)
+		eP, err = loadEventCSV(location, eN)
 		if err != nil {
-			tmpLimiter += 1 // TODO: REVIEW: Remove limiter?
-			eP, err := getEvent(location, eN)
+			tmpLimiter += 1              // TODO: REVIEW: Remove limiter?
+			time.Sleep(10 * time.Second) // TODO: TEMP?
+			eP, err = getEvent(location, eN)
 			if err != nil {
 				fmt.Println("No more events to fetch.")
+				incomplete = false
 				break
-			} else {
-				fmt.Printf("Fetched event %v: %v...\n", eP.number, eP.date)
 			}
+			fmt.Printf("Fetched event %v: %v...\n", eP.number, eP.date)
 			eP.writeCSV()
 		} else {
 			fmt.Printf("Loaded event %v: %v...\n", eP.number, eP.date)
 		}
 		eventPs = append(eventPs, eP)
 	}
-	fmt.Println(len(eventPs))
+	if !incomplete {
+		// TODO: TEMP: print ordered list of most frequent runners:
+		findOccurancesPerRunner(eventPs)
+	}
 }

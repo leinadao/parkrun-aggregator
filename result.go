@@ -1,5 +1,7 @@
 package main
 
+// TODO: Add test code!
+
 // resultsCapacity constant is the initial slice capacity to be used for event results.
 const resultsCapacity = 500 // TODO: REVIEW capacity of 500.
 

@@ -14,6 +14,8 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
+// TODO: Add test code!
+
 // event is a single Parkrun event including metadata and runner results.
 type event struct {
 	location string
@@ -186,6 +188,7 @@ func getEvent(location string, eventNum int) (*event, error) {
 	}
 	date := strings.ReplaceAll(doc.Find(".Results-header").Find(".format-date").Text(), "/", "-")
 	results := make([]result, 0, resultsCapacity)
+	// TODO: Split this off to newResultFromHTMLTable:
 	docRes.Each(func(i int, s *goquery.Selection) {
 		idStr := s.Find(".Results-table-td.Results-table-td--name").Find(".compact").Find("a").AttrOr("href", "")
 		id, _ := strconv.Atoi(idStr[strings.LastIndex(idStr, "/")+1:]) // TODO: Handle error.
