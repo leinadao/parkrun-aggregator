@@ -24,8 +24,19 @@ type event struct {
 
 // filename returns a CSV filename to use for storing the event's results data.
 // The filename also acts as the store of the event metadata.
-func (e *event) filename() string {
-	return fmt.Sprintf("%v_%v_%v.csv", e.location, e.number, e.date)
+func (e *event) filename() string { // TODO: Rename to filepath?
+	curPath, err := os.Getwd()
+	if err != nil {
+		// TODO: Improve error handling.
+		log.Println(err)
+	}
+	dataDir := filepath.Join(curPath, "data")
+	err = os.MkdirAll(dataDir, os.ModePerm)
+	if err != nil {
+		// TODO: Improve error handling.
+		log.Println(err)
+	}
+	return filepath.Join(dataDir, fmt.Sprintf("%v_%v_%v.csv", e.location, e.number, e.date))
 }
 
 // writeCSV writes the event's data to a CSV file.
