@@ -5,9 +5,41 @@ package main
 
 import (
 	"fmt"
+	"sort"
+	"time"
 )
 
 // TODO: Add test code!
+
+// findOccurancesPerRunner prints out each runner and their total number of runs,
+// in ascending order, from the given slice of event pointers.
+func findOccurancesPerRunner(eventPs []*event) {
+	numPerRunner := map[runner]int{}
+	for _, eP := range eventPs {
+		for _, r := range eP.results {
+			_, ok := numPerRunner[r.runner]
+			if ok {
+				numPerRunner[r.runner] += 1 // TODO: REVIEW: Can just have this line without an ok check due to the default 0?
+			} else {
+				numPerRunner[r.runner] = 1
+			}
+		}
+	}
+	runnersPerNum := map[int][]runner{}
+	for r, n := range numPerRunner {
+		runnersPerNum[n] = append(runnersPerNum[n], r)
+	}
+	var nums []int
+	for n := range runnersPerNum {
+		nums = append(nums, n)
+	}
+	sort.Ints(nums)
+	for _, n := range nums {
+		for _, r := range runnersPerNum[n] {
+			fmt.Printf("%s (%d), %d\n", r.name, r.id, n)
+		}
+	}
+}
 
 // main takes a Parkrun location and retrieves any outstanding data.
 // Data is written to a CSV file per event.
