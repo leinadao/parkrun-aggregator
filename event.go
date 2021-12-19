@@ -55,7 +55,7 @@ func (e *event) filename_volunteers() string {
 // The filename method is used to determine the filename used.
 // Any existing file will be overwritten.
 func (e *event) writeCSV() {
-	data := make([][]string, 0, resultsCapacity+1)
+	data := make([][]string, 0, len(e.results)+1)
 	data = append(data, []string{"runnerID", "runnerName", "runnerGender", "ageGroup", "clubID", "clubName", "position", "runs", "ageGrade", "achievement", "time", "currentPB"})
 	for _, r := range e.results {
 		data = append(data, []string{
