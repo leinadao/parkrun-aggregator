@@ -130,6 +130,37 @@ func parseEventFilename(filename string) (location string, number int, date stri
 	return parts[0], number, parts[2]
 }
 
+// newVolunteersFromCSV loads the event volunteers data from the
+// given filename and returns a pointer to the new slice.
+func newVolunteersFromCSV(filename_volunteers string) *[]runner {
+	// TODO: Error handling add / upgrade.
+	var newVolunteers []runner
+	f, err := os.Open(filename_volunteers)
+	if err != nil {
+		log.Fatal("Unable to read input file "+filename_volunteers, err)
+	}
+	defer f.Close()
+	csvReader := csv.NewReader(f)
+	data, err := csvReader.ReadAll() // TODO: DRY file reading to data return?
+	if err != nil {
+		log.Fatal("Unable to parse file as CSV for "+filename_volunteers, err)
+	}
+	for i, r := range data {
+		// TODO: REVIEW: Could use reflection to handle mis-ordered columns.
+		if i == 0 {
+			// TODO: Add checking for header line. -> def as const? --> gen from struct values??
+			// TODO: REVIEW: Could check for column names and ignore odd columns.
+			continue
+		}
+		id, _ := strconv.Atoi(r[0])
+		newVolunteers = append(newVolunteers, runner{
+			id:   id,
+			name: r[1],
+		})
+	}
+	return &newVolunteers
+}
+
 // newEventFromCSV loads the event data from the
 // given filename and returns a pointer to the new instance.
 func newEventFromCSV(filename string, filename_volunteers string) *event {
@@ -139,6 +170,9 @@ func newEventFromCSV(filename string, filename_volunteers string) *event {
 		location: location,
 		number:   eventNum,
 		date:     date,
+	}
+	if filename_volunteers != "" {
+		newEvent.volunteers = *newVolunteersFromCSV(filename_volunteers)
 	}
 	f, err := os.Open(filename)
 	if err != nil {
