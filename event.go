@@ -16,6 +16,10 @@ import (
 
 // TODO: Add test code!
 
+// achPBStr is the achievement string used by Parkrun for a new PB.
+// achFirstStr is the achievement string used by Parkrun for a first time run.
+var achPBStr, achFirstStr = "New PB!", "First Timer!"
+
 // event is a single Parkrun event including metadata and runner results.
 type event struct {
 	location   string
@@ -257,7 +261,7 @@ func getEvent(location string, eventNum int) (*event, error) {
 		currentPB = strings.ReplaceAll(currentPB, "&nbsp;", "")
 		time := s.Find(".Results-table-td.Results-table-td--time").Find(".compact").Text()
 		// Handle text in PB field:
-		if currentPB == "New PB!" || currentPB == "First Timer!" {
+		if currentPB == achPBStr || currentPB == achFirstStr {
 			currentPB = time
 		}
 		position, _ := strconv.Atoi(s.AttrOr("data-position", ""))           // TODO: Handle error.
