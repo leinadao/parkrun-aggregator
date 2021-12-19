@@ -128,7 +128,7 @@ func parseEventFilename(filename string) (location string, number int, date stri
 
 // newEventFromCSV loads the event data from the
 // given filename and returns a pointer to the new instance.
-func newEventFromCSV(filename string) *event {
+func newEventFromCSV(filename string, filename_volunteers string) *event {
 	// TODO: Error handling add / upgrade.
 	location, eventNum, date := parseEventFilename(filename)
 	newEvent := event{
@@ -191,10 +191,29 @@ func loadEventCSV(location string, eventNum int) (*event, error) {
 	if matches == nil {
 		return nil, errors.New("no files found")
 	}
-	if len(matches) != 1 {
+	var ms []string
+	var vMs []string
+	for _, m := range matches {
+		if strings.Contains(m, "_volunteers") { // TODO: DRY string.
+			vMs = append(vMs, m)
+			continue
+		}
+		ms = append(ms, m)
+	}
+	if len(ms) == 0 {
+		return nil, errors.New("no files found")
+	}
+	if len(ms) > 1 {
 		return nil, errors.New("multiple files found")
 	}
-	eP := newEventFromCSV(matches[0])
+	vM := ""
+	if len(vMs) != 0 {
+		vM = vMs[0]
+	}
+	if len(vMs) > 1 {
+		return nil, errors.New("multiple volunteer files found")
+	}
+	eP := newEventFromCSV(ms[0], vM)
 	return eP, nil
 }
 
@@ -264,7 +283,7 @@ func getEvent(location string, eventNum int) (*event, error) {
 		})
 	})
 	// TODO: DRY as e.g. newVolunteersFromHTML
-	volunteers := make([]runner, 0, 30)
+	volunteers := make([]runner, 0, 30) // TODO: DRY 30.
 	docVols := doc.Find(".paddedb").First().Find("a")
 	docVols.Each(func(i int, s *goquery.Selection) {
 		vIDStr := s.AttrOr("href", "")
