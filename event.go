@@ -18,10 +18,11 @@ import (
 
 // event is a single Parkrun event including metadata and runner results.
 type event struct {
-	location string
-	number   int
-	date     string // Format dd-mm-yyy.
-	results  []result
+	location   string
+	number     int
+	date       string // Format dd-mm-yyy.
+	results    []result
+	volunteers []runner
 }
 
 // filename returns a CSV filename to use for storing the event's results data.
@@ -39,6 +40,11 @@ func (e *event) filename() string { // TODO: Rename to filepath?
 		log.Println(err)
 	}
 	return filepath.Join(dataDir, fmt.Sprintf("%v_%v_%v.csv", e.location, e.number, e.date))
+}
+
+// filename_volunteers returns a CSV filename to use for storing the even't volunteer data.
+func (e *event) filename_volunteers() string {
+	return strings.Replace(e.filename(), ".csv", "_volunteers.csv", 1)
 }
 
 // writeCSV writes the event's data to a CSV file.
@@ -70,6 +76,36 @@ func (e *event) writeCSV() {
 		// TODO: Update error handling.
 	}
 	defer file.Close()
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+	for _, value := range data {
+		err := writer.Write(value)
+		if err != nil {
+			log.Fatal("Cannot write to file", err)
+			// TODO: Update error handling.
+		}
+	}
+}
+
+// writeCSVVolunteers writes the event's volunteers data to a CSV file.
+// The filename_volunteers method is used to determine the filename used.
+// Any existing file will be overwritten.
+func (e *event) writeCSVVolunteers() {
+	data := make([][]string, 0, len(e.volunteers)+1)
+	data = append(data, []string{"runnerID", "runnerName"})
+	for _, v := range e.volunteers {
+		data = append(data, []string{
+			strconv.Itoa(v.id),
+			v.name,
+		})
+	}
+	// TODO: Handle custom file location?
+	file, err := os.Create(e.filename_volunteers())
+	if err != nil {
+		log.Fatal("Cannot create file", err)
+		// TODO: Update error handling.
+	}
+	defer file.Close() // TODO: DRY some of these lines with the above?
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 	for _, value := range data {
@@ -227,12 +263,25 @@ func getEvent(location string, eventNum int) (*event, error) {
 			time:        time,
 		})
 	})
+	// TODO: DRY as e.g. newVolunteersFromHTML
+	volunteers := make([]runner, 0, 30)
+	docVols := doc.Find(".paddedb").First().Find("a")
+	docVols.Each(func(i int, s *goquery.Selection) {
+		vIDStr := s.AttrOr("href", "")
+		vID, _ := strconv.Atoi(vIDStr[strings.LastIndex(vIDStr, "=")+1:])
+		// TODO: Handle error...
+		volunteers = append(volunteers, runner{
+			id:   vID,
+			name: s.Text(),
+		})
+	})
 	// TODO: Make event before results and build into event for efficiency?
 	return &event{
-		location: location,
-		number:   eventNum,
-		date:     date,
-		results:  results,
+		location:   location,
+		number:     eventNum,
+		date:       date,
+		results:    results,
+		volunteers: volunteers,
 	}, nil
 }
 

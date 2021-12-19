@@ -68,7 +68,10 @@ func main() {
 				break
 			}
 			fmt.Printf("Fetched event %v: %v...\n", eP.number, eP.date)
+			// TODO: Handle volunteers as a command line option?
+			// TODO: Combine into a writeCSVs?
 			eP.writeCSV()
+			eP.writeCSVVolunteers()
 		} else {
 			fmt.Printf("Loaded event %v: %v...\n", eP.number, eP.date)
 		}
