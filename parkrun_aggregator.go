@@ -69,14 +69,14 @@ func main() {
 	var eventPs []*event
 	incomplete := true
 	// Load or fetch all possible events for the location:
-	for eN, tmpLimiter := 1, 0; tmpLimiter < 25; eN++ {
+	for eN, limiter := 1, 0; limiter < 25; eN++ {
 		var (
 			eP  *event // Needed for use outside if, if set in if.
 			err error
 		)
 		eP, err = loadEventCSV(location, eN, withVolunteers)
 		if err != nil {
-			tmpLimiter += 1              // TODO: REVIEW: Remove limiter?
+			limiter += 1                 // TODO: REVIEW: Make limiter an input argument?
 			time.Sleep(10 * time.Second) // TODO: TEMP?
 			eP, err = getEvent(location, eN)
 			if err != nil {
