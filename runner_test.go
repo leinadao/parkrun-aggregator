@@ -9,17 +9,17 @@ func TestRunnerFields(t *testing.T) {
 		name:   n1,
 		gender: g1,
 	}
-	r1id := r1.id
-	if r1id != i1 {
-		t.Errorf("runner{id=%d}.id = %d; want %d", i1, r1id, i1)
+	r1ID := r1.id
+	if r1ID != i1 {
+		t.Errorf("runner{id=%d}.id = %d; want %d", i1, r1ID, i1)
 	}
-	r1name := r1.name
-	if r1name != n1 {
-		t.Errorf("runner{name=%s}.name = %s; want %s", n1, r1name, n1)
+	r1Name := r1.name
+	if r1Name != n1 {
+		t.Errorf("runner{name=%s}.name = %s; want %s", n1, r1Name, n1)
 	}
-	r1gender := r1.gender
-	if r1gender != g1 {
-		t.Errorf("runner{gender=%s}.gender = %s; want %s", g1, r1gender, g1)
+	r1Gender := r1.gender
+	if r1Gender != g1 {
+		t.Errorf("runner{gender=%s}.gender = %s; want %s", g1, r1Gender, g1)
 	}
 }
 

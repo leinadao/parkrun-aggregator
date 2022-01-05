@@ -8,13 +8,13 @@ func TestClubFields(t *testing.T) {
 		id:   i1,
 		name: n1,
 	}
-	c1id := c1.id
-	if c1id != i1 {
-		t.Errorf("club{id=%d}.id = %d; want %d", i1, c1id, i1)
+	c1ID := c1.id
+	if c1ID != i1 {
+		t.Errorf("club{id=%d}.id = %d; want %d", i1, c1ID, i1)
 	}
-	c1name := c1.name
-	if c1name != n1 {
-		t.Errorf("club{name=%s}.name = %s; want %s", n1, c1name, n1)
+	c1Name := c1.name
+	if c1Name != n1 {
+		t.Errorf("club{name=%s}.name = %s; want %s", n1, c1Name, n1)
 	}
 }
 
