@@ -13,15 +13,27 @@ import (
 
 // findOccurancesPerRunner prints out each runner and their total number of runs,
 // in ascending order, from the given slice of event pointers.
-func findOccurancesPerRunner(eventPs []*event) {
+// If volunteering is true, it's their number of times volunteering.
+func findOccurancesPerRunner(eventPs []*event, volunteering bool) {
 	numPerRunner := map[runner]int{}
 	for _, eP := range eventPs {
-		for _, r := range eP.results {
-			_, ok := numPerRunner[r.runner]
-			if ok {
-				numPerRunner[r.runner] += 1 // TODO: REVIEW: Can just have this line without an ok check due to the default 0?
-			} else {
-				numPerRunner[r.runner] = 1
+		if volunteering {
+			for _, r := range eP.volunteers {
+				_, ok := numPerRunner[r]
+				if ok {
+					numPerRunner[r] += 1 // TODO: REVIEW: Can just have this line without an ok check due to the default 0?
+				} else {
+					numPerRunner[r] = 1
+				}
+			}
+		} else {
+			for _, r := range eP.results {
+				_, ok := numPerRunner[r.runner]
+				if ok {
+					numPerRunner[r.runner] += 1 // TODO: REVIEW: Can just have this line without an ok check due to the default 0?
+				} else {
+					numPerRunner[r.runner] = 1
+				}
 			}
 		}
 	}
@@ -45,10 +57,15 @@ func findOccurancesPerRunner(eventPs []*event) {
 // Data is written to a CSV file per event.
 func main() {
 	// Take in a location name:
-	fmt.Println("Enter the full Parkrun location name. e.g. 'bathskyline': ") // TODO: Split off this input as own fn.
+	fmt.Println("Enter the full Parkrun location name. e.g. 'bathskyline': ") // TODO: Split off this input as own fn(s).
 	var location string
 	fmt.Scanln(&location)
 	fmt.Printf("Location is %v...\n", location)
+	// Ask whether to process with volunteers:
+	fmt.Println("Should volunteer data be included? Enter y / n: ")
+	var withVolunteersS string
+	fmt.Scanln(&withVolunteersS)
+	withVolunteers := withVolunteersS == "y"
 	var eventPs []*event
 	incomplete := true
 	// Load or fetch all possible events for the location:
@@ -57,7 +74,7 @@ func main() {
 			eP  *event // Needed for use outside if, if set in if.
 			err error
 		)
-		eP, err = loadEventCSV(location, eN)
+		eP, err = loadEventCSV(location, eN, withVolunteers)
 		if err != nil {
 			tmpLimiter += 1              // TODO: REVIEW: Remove limiter?
 			time.Sleep(10 * time.Second) // TODO: TEMP?
@@ -78,7 +95,22 @@ func main() {
 		eventPs = append(eventPs, eP)
 	}
 	if !incomplete {
+		//TODO: Present menu of functions to run (numbered or by name):
+		// https://medium.com/@vicky.kurniawan/go-call-a-function-from-string-name-30b41dcb9e12
 		// TODO: TEMP: print ordered list of most frequent runners:
-		findOccurancesPerRunner(eventPs)
+		findOccurancesPerRunner(eventPs, false)
+		fmt.Println("====================================")
+		fmt.Println("===========^^^RUNNERS^^^============")
+		fmt.Println("====================================")
+		if withVolunteers {
+			// TODO: Ensure all events have loaded volunteer data if running volunteer calcs?
+			// Could check not empty list? --> Need to set a var to to if it was actually loaded so not
+			// assuming all events have volunteers? Or an okay assumption but log?
+			// TODO: TEMP: print ordered list of most frequent runners:
+			findOccurancesPerRunner(eventPs, true)
+			fmt.Println("====================================")
+			fmt.Println("==========^^^VOLUNTEERS^^^==========")
+			fmt.Println("====================================")
+		}
 	}
 }

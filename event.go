@@ -220,7 +220,7 @@ func newEventFromCSV(filename string, filename_volunteers string) *event {
 
 // loadEvent tries to load and return an event pointer from
 // a CSV file based only on the event location and number given.
-func loadEventCSV(location string, eventNum int) (*event, error) {
+func loadEventCSV(location string, eventNum int, require_volunteers bool) (*event, error) {
 	tmpE := event{location: location, number: eventNum, date: "*"}
 	matches, err := filepath.Glob(tmpE.filename())
 	if err != nil {
@@ -250,6 +250,9 @@ func loadEventCSV(location string, eventNum int) (*event, error) {
 	}
 	if len(vMs) > 1 {
 		return nil, errors.New("multiple volunteer files found")
+	}
+	if require_volunteers && len(vMs) == 0 {
+		return nil, errors.New("no volunteer files found")
 	}
 	eP := newEventFromCSV(ms[0], vM)
 	return eP, nil
